@@ -11,3 +11,14 @@ export function provenanceLabel(stateType) {
   };
   return labels[stateType] ?? 'UNKNOWN';
 }
+
+export function areaDescriptor(area) {
+  const parts = [area?.source_key, area?.layer_type].filter(Boolean);
+  return parts.length ? parts.join(' · ') : 'official climate feature';
+}
+
+export function formatTimestamp(value) {
+  if (!value) return 'No timestamp available';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? 'Invalid timestamp' : parsed.toLocaleString(undefined, { timeZoneName: 'short' });
+}
