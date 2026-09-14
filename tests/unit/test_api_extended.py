@@ -19,7 +19,7 @@ def _zone() -> ClimateZone:
             ],
         },
         crs="EPSG:4326",
-        attributes={"phk_gesamt": "hoch", "bezirk": "Mitte"},
+        attributes={"phk_gesamt": "hoch", "bezirk": "Mitte", "pet14h": 36.5},
         provenance=Provenance(
             source="Berlin Open Data / Umweltatlas",
             dataset="fixture",
@@ -73,6 +73,13 @@ def test_area_analytics_and_openapi_are_published(tmp_path: Path) -> None:
     assert summary.json()["state_type"] == "derived"
     assert summary.json()["categories"][0]["category"] == "hoch"
 
+    numeric = client.get(
+        "/api/v1/analytics/numeric-summary?attribute=pet14h&unit=degC&source_key=climate_assessment"
+    )
+    assert numeric.status_code == 200
+    assert numeric.json()["median"] == 36.5
+    assert numeric.json()["unit"] == "degC"
+
     grouped = client.get(
         "/api/v1/analytics/grouped-area-summary?classification_attribute=phk_gesamt&group_attribute=bezirk"
     )
@@ -82,4 +89,5 @@ def test_area_analytics_and_openapi_are_published(tmp_path: Path) -> None:
     schema = client.get("/openapi.json").json()
     assert "/api/v1/climate/query/point" in schema["paths"]
     assert "/api/v1/analytics/area-summary" in schema["paths"]
+    assert "/api/v1/analytics/numeric-summary" in schema["paths"]
     assert "/api/v1/heat/snapshot" in schema["paths"]
