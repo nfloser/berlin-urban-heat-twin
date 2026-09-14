@@ -32,6 +32,7 @@ REQUIRED_API_PATHS = {
     "/api/v1/heat/areas",
     "/api/v1/heat/snapshot",
     "/api/v1/analytics/area-summary",
+    "/api/v1/analytics/numeric-summary",
     "/api/v1/analytics/grouped-area-summary",
     "/api/v1/analytics/station-climate-overlap",
     "/api/v1/heat/scenario",
