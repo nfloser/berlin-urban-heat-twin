@@ -145,14 +145,25 @@ class HeatSnapshot(BaseModel):
 
 class ThermalArea(BaseModel):
     schema_version: str = "1.0"
+    timestamp: datetime
     area_id: str
     geometry: dict[str, Any]
     crs: str = "EPSG:4326"
-    indicators: dict[str, float | str | None]
+    indicators: list[ThermalIndicator]
+    state_type: StateType
+    source: str
     official_classification: str | None = None
     provenance: Provenance
+    freshness_hours: float | None = Field(default=None, ge=0)
     quality: QualityFlag
     uncertainty: list[str] = Field(default_factory=list)
+
+    @field_validator("timestamp")
+    @classmethod
+    def timestamp_must_be_aware(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("timestamp must be timezone-aware")
+        return value.astimezone(UTC)
 
 
 class AreaCategoryStatistic(BaseModel):
