@@ -20,6 +20,7 @@ dependencies = [
 dev = [
   "pytest==9.0.2",
   "mypy>=1.15,<2",
+  "numpy==1.26.4; python_version < '3.13'",
   "ruff>=0.11,<1",
   "types-shapely>=2.0.0.20240820",
 ]
