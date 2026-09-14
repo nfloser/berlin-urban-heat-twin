@@ -43,14 +43,14 @@ def main() -> None:
     service = HeatService()
 
     if args.command == "climate-layers":
-        provider = BerlinWFSProvider(BERLIN_SOURCES[args.source], timeout)
-        for layer in provider.discover_layers():
+        climate_provider = BerlinWFSProvider(BERLIN_SOURCES[args.source], timeout)
+        for layer in climate_provider.discover_layers():
             print(f"{layer.type_name}\t{layer.title or ''}\t{layer.default_crs or ''}")
         return
 
     if args.command in {"dwd-stations", "ingest-dwd"}:
-        provider = DWDProvider(timeout)
-        stations = provider.fetch_station_metadata()
+        dwd_provider = DWDProvider(timeout)
+        stations = dwd_provider.fetch_station_metadata()
         now = datetime.now(UTC)
         recent_cutoff = now - timedelta(days=7)
         stations = [
@@ -71,7 +71,7 @@ def main() -> None:
         successful_stations = []
         for station in stations:
             try:
-                values = provider.fetch_recent_observations(station.station_id)
+                values = dwd_provider.fetch_recent_observations(station.station_id)
             except Exception as exc:
                 print(f"SKIP {station.station_id}: {exc}")
                 continue
@@ -85,11 +85,11 @@ def main() -> None:
         return
 
     if args.command == "ingest-climate":
-        provider = BerlinWFSProvider(BERLIN_SOURCES[args.source], timeout)
-        discovered = {layer.type_name for layer in provider.discover_layers()}
+        climate_provider = BerlinWFSProvider(BERLIN_SOURCES[args.source], timeout)
+        discovered = {layer.type_name for layer in climate_provider.discover_layers()}
         if args.type_name not in discovered:
             raise SystemExit(f"Layer {args.type_name!r} not present in current WFS capabilities")
-        areas = provider.fetch_features(args.type_name, args.limit)
+        areas = climate_provider.fetch_features(args.type_name, args.limit)
         service.cache_models(f"areas-{args.source}", areas)
         invalid = sum(not area.geometry_valid for area in areas)
         print(f"Cached {len(areas)} feature(s); invalid geometries: {invalid}.")

@@ -19,7 +19,9 @@ from berlin_heat_twin.storage import JSONStore
 
 class HeatService:
     def __init__(self, data_dir: str | Path | None = None) -> None:
-        root = data_dir or os.getenv("HEAT_TWIN_DATA_DIR", "data/cache")
+        root: str | Path = (
+            data_dir if data_dir is not None else os.getenv("HEAT_TWIN_DATA_DIR", "data/cache")
+        )
         self.store = JSONStore(root)
 
     def stations(self) -> list[MeteorologicalStation]:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
@@ -20,7 +21,7 @@ app.state.service = HeatService()
 
 
 def _service() -> HeatService:
-    return app.state.service
+    return cast(HeatService, app.state.service)
 
 
 @app.get("/api/v1/health")
