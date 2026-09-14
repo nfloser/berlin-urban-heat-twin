@@ -69,6 +69,8 @@ The WFS layer name is discovered first rather than hard-coded, because official 
 - `GET /api/v1/health`
 - `GET /api/v1/sources`
 - `GET /api/v1/climate/layers/{source}`
+- `GET /api/v1/heat/state`
+- `GET /api/v1/heat/areas`
 - `GET /api/v1/weather/stations`
 - `GET /api/v1/weather/observations`
 - `GET /api/v1/heat/snapshot`

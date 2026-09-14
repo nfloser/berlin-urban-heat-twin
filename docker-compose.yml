@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      HEAT_TWIN_DATA_DIR: /app/data/cache
+    volumes:
+      - heat-cache:/app/data/cache
+volumes:
+  heat-cache:

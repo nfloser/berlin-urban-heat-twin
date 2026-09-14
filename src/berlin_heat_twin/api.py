@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
 from berlin_heat_twin.domain import ScenarioRequest, ScenarioResult
+from berlin_heat_twin.providers.berlin_wfs import BerlinWFSProvider
 from berlin_heat_twin.service import HeatService
 from berlin_heat_twin.sources import BERLIN_SOURCES, DWD_DATASET_PAGE
 
@@ -51,6 +52,32 @@ def sources() -> list[dict[str, str | None]]:
         }
     )
     return berlin
+
+
+
+
+@app.get("/api/v1/climate/layers/{source_key}")
+def climate_layers(source_key: str) -> list[dict[str, object]]:
+    source = BERLIN_SOURCES.get(source_key)
+    if source is None:
+        raise HTTPException(404, "unknown climate source")
+    try:
+        layers = BerlinWFSProvider(source).discover_layers()
+    except Exception as exc:
+        raise HTTPException(502, f"upstream WFS unavailable: {exc}") from exc
+    return [layer.model_dump(mode="json") for layer in layers]
+
+
+@app.get("/api/v1/heat/state")
+def heat_state(at: datetime | None = Query(default=None)) -> dict[str, object]:
+    if at is not None and at.tzinfo is None:
+        raise HTTPException(422, "at must include a timezone offset")
+    return _service().snapshot(at).state.model_dump(mode="json")
+
+
+@app.get("/api/v1/heat/areas")
+def heat_areas() -> list[dict[str, object]]:
+    return [item.model_dump(mode="json") for item in _service().official_areas()]
 
 
 @app.get("/api/v1/weather/stations")

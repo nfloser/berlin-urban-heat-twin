@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from berlin_heat_twin.providers.berlin_wfs import BerlinWFSProvider
 from berlin_heat_twin.providers.dwd import DWDProvider
@@ -49,7 +49,13 @@ def main() -> None:
         provider = DWDProvider(timeout)
         stations = provider.fetch_station_metadata()
         now = datetime.now(UTC)
-        stations = [s for s in stations if s.active_at(now)]
+        recent_cutoff = now - timedelta(days=7)
+        stations = [
+            s
+            for s in stations
+            if (s.valid_from is None or s.valid_from <= now)
+            and (s.valid_to is None or s.valid_to >= recent_cutoff)
+        ]
         if args.berlin_only:
             stations = [s for s in stations if _berlin_station(s)]
         if args.command == "dwd-stations":
