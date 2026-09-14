@@ -18,13 +18,15 @@ def _zone(zone_id: str, x0: float, classification: str, valid: bool = True) -> C
         layer_type="assessment:test",
         geometry={
             "type": "Polygon",
-            "coordinates": [[
-                [x0, 52.5],
-                [x0 + 0.05, 52.5],
-                [x0 + 0.05, 52.55],
-                [x0, 52.55],
-                [x0, 52.5],
-            ]],
+            "coordinates": [
+                [
+                    [x0, 52.5],
+                    [x0 + 0.05, 52.5],
+                    [x0 + 0.05, 52.55],
+                    [x0, 52.55],
+                    [x0, 52.5],
+                ]
+            ],
         },
         crs="EPSG:4326",
         attributes={"phk_gesamt": classification, "bezirk": "Mitte"},
@@ -34,7 +36,11 @@ def _zone(zone_id: str, x0: float, classification: str, valid: bool = True) -> C
 
 
 def test_point_query_returns_only_valid_intersections() -> None:
-    zones = [_zone("a", 13.30, "hoch"), _zone("b", 13.40, "niedrig"), _zone("bad", 13.30, "hoch", False)]
+    zones = [
+        _zone("a", 13.30, "hoch"),
+        _zone("b", 13.40, "niedrig"),
+        _zone("bad", 13.30, "hoch", False),
+    ]
     matches = point_matches_zones(zones, longitude=13.32, latitude=52.52)
     assert [zone.zone_id for zone in matches] == ["a"]
 
@@ -43,7 +49,9 @@ def test_polygon_query_supports_explicit_query_crs() -> None:
     zones = [_zone("a", 13.30, "hoch"), _zone("b", 13.40, "niedrig")]
     query = {
         "type": "Polygon",
-        "coordinates": [[[13.34, 52.51], [13.42, 52.51], [13.42, 52.54], [13.34, 52.54], [13.34, 52.51]]],
+        "coordinates": [
+            [[13.34, 52.51], [13.42, 52.51], [13.42, 52.54], [13.34, 52.54], [13.34, 52.51]]
+        ],
     }
     matches = polygon_matches_zones(zones, query, "EPSG:4326")
     assert [zone.zone_id for zone in matches] == ["a", "b"]
