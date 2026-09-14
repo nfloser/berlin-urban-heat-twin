@@ -173,11 +173,15 @@ def analytics_area_summary(
     source_key: str | None = Query(default=None),
     layer_type: str | None = Query(default=None),
 ) -> dict[str, object]:
-    return _service().thermal_area_summary(
-        attribute=attribute,
-        source_key=source_key,
-        layer_type=layer_type,
-    ).model_dump(mode="json")
+    return (
+        _service()
+        .thermal_area_summary(
+            attribute=attribute,
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+        .model_dump(mode="json")
+    )
 
 
 @app.get("/api/v1/analytics/grouped-area-summary")
@@ -187,12 +191,16 @@ def analytics_grouped_area_summary(
     source_key: str | None = Query(default=None),
     layer_type: str | None = Query(default=None),
 ) -> dict[str, object]:
-    return _service().grouped_thermal_area_summary(
-        classification_attribute=classification_attribute,
-        group_attribute=group_attribute,
-        source_key=source_key,
-        layer_type=layer_type,
-    ).model_dump(mode="json")
+    return (
+        _service()
+        .grouped_thermal_area_summary(
+            classification_attribute=classification_attribute,
+            group_attribute=group_attribute,
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+        .model_dump(mode="json")
+    )
 
 
 @app.get("/api/v1/analytics/station-climate-overlap")
