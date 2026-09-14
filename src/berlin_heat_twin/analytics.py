@@ -217,7 +217,9 @@ def grouped_area_summary(
         classification_attribute=classification_attribute,
         group_attribute=group_attribute,
         groups=[
-            AreaGroupSummary(group=name, summary=area_summary(group_zones, attribute=classification_attribute))
+            AreaGroupSummary(
+                group=name, summary=area_summary(group_zones, attribute=classification_attribute)
+            )
             for name, group_zones in sorted(groups.items())
         ],
         methodology=(
@@ -225,7 +227,9 @@ def grouped_area_summary(
             "When the group attribute is an official district field this yields a district-level summary; "
             "district membership is never guessed from names."
         ),
-        uncertainty=["Groups exist only where the selected official layer exposes the requested grouping attribute."],
+        uncertainty=[
+            "Groups exist only where the selected official layer exposes the requested grouping attribute."
+        ],
     )
 
 
@@ -248,9 +252,7 @@ def station_climate_overlap(
         observation = latest.get(station.station_id)
         if observation is None:
             continue
-        matches = point_matches_zones(
-            zones, longitude=station.longitude, latitude=station.latitude
-        )
+        matches = point_matches_zones(zones, longitude=station.longitude, latitude=station.latitude)
         if not matches:
             continue
         result.append(
