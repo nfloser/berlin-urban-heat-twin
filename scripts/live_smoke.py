@@ -8,16 +8,17 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
+from berlin_heat_twin.domain import MeteorologicalStation
 from berlin_heat_twin.providers.berlin_wfs import BerlinWFSProvider
 from berlin_heat_twin.providers.dwd import DWDProvider
 from berlin_heat_twin.sources import BERLIN_BBOX_WGS84, BERLIN_SOURCES
 
 
-def in_berlin(station: object) -> bool:
+def in_berlin(station: MeteorologicalStation) -> bool:
     min_lon, min_lat, max_lon, max_lat = BERLIN_BBOX_WGS84
     return (
-        min_lat <= float(getattr(station, "latitude")) <= max_lat
-        and min_lon <= float(getattr(station, "longitude")) <= max_lon
+        min_lat <= station.latitude <= max_lat
+        and min_lon <= station.longitude <= max_lon
     )
 
 

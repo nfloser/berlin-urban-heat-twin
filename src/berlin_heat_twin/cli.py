@@ -4,16 +4,17 @@ import argparse
 import os
 from datetime import UTC, datetime, timedelta
 
+from berlin_heat_twin.domain import MeteorologicalStation
 from berlin_heat_twin.providers.berlin_wfs import BerlinWFSProvider
 from berlin_heat_twin.providers.dwd import DWDProvider
 from berlin_heat_twin.service import HeatService
 from berlin_heat_twin.sources import BERLIN_BBOX_WGS84, BERLIN_SOURCES
 
 
-def _berlin_station(station: object) -> bool:
+def _berlin_station(station: MeteorologicalStation) -> bool:
     min_lon, min_lat, max_lon, max_lat = BERLIN_BBOX_WGS84
-    latitude = float(getattr(station, "latitude"))
-    longitude = float(getattr(station, "longitude"))
+    latitude = station.latitude
+    longitude = station.longitude
     return min_lat <= latitude <= max_lat and min_lon <= longitude <= max_lon
 
 

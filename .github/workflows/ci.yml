@@ -14,7 +14,11 @@ jobs:
       - run: pip install -e '.[dev]'
       - run: pytest
       - run: ruff check .
-      - run: ruff format --check .
+      - name: Validate formatting
+        run: |
+          ruff format .
+          git diff --check
+          git diff --exit-code
       - run: mypy src
 
   frontend:
