@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:WFS_Capabilities xmlns:wfs="http://www.opengis.net/wfs/2.0">
+  <wfs:FeatureTypeList>
+    <wfs:FeatureType>
+      <wfs:Name>fis:heat_zone</wfs:Name>
+      <wfs:Title>Thermal burden</wfs:Title>
+      <wfs:DefaultCRS>urn:ogc:def:crs:EPSG::25833</wfs:DefaultCRS>
+    </wfs:FeatureType>
+  </wfs:FeatureTypeList>
+</wfs:WFS_Capabilities>
