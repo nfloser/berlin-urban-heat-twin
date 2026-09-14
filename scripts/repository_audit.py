@@ -70,7 +70,9 @@ def audit_cache() -> None:
         if path.is_file() and path.name != ".gitkeep"
     ]
     if committed_payloads:
-        raise RuntimeError(f"third-party/cache payloads must not be committed: {committed_payloads}")
+        raise RuntimeError(
+            f"third-party/cache payloads must not be committed: {committed_payloads}"
+        )
 
 
 def audit_schemas() -> None:
@@ -85,16 +87,19 @@ def audit_schemas() -> None:
     area_required = set(thermal_area_schema.get("required", []))
     if not {"timestamp", "state", "spatial_coverage", "uncertainty"} <= snapshot_required:
         raise RuntimeError("HeatSnapshot schema is missing required integration fields")
-    if not {
-        "timestamp",
-        "area_id",
-        "geometry",
-        "indicators",
-        "state_type",
-        "source",
-        "provenance",
-        "quality",
-    } <= area_required:
+    if (
+        not {
+            "timestamp",
+            "area_id",
+            "geometry",
+            "indicators",
+            "state_type",
+            "source",
+            "provenance",
+            "quality",
+        }
+        <= area_required
+    ):
         raise RuntimeError("ThermalArea schema is missing required integration fields")
 
 
