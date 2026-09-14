@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+
+from berlin_heat_twin.domain import ScenarioRequest, ScenarioResult
+from berlin_heat_twin.service import HeatService
+from berlin_heat_twin.sources import BERLIN_SOURCES, DWD_DATASET_PAGE
+
+app = FastAPI(
+    title="Berlin Urban Heat Twin API",
+    version="1.0.0",
+    description="Research API separating measured, officially modelled, derived and scenario heat information.",
+)
+app.state.service = HeatService()
+
+
+def _service() -> HeatService:
+    return app.state.service
+
+
+@app.get("/api/v1/health")
+def health() -> dict[str, str]:
+    return {"status": "ok", "service": "berlin-urban-heat-twin"}
+
+
+@app.get("/api/v1/sources")
+def sources() -> list[dict[str, str | None]]:
+    berlin = [
+        {
+            "key": source.key,
+            "title": source.title,
+            "url": source.url,
+            "dataset_page": source.dataset_page,
+            "state_type": source.state_type,
+            "licence": source.licence,
+        }
+        for source in BERLIN_SOURCES.values()
+    ]
+    berlin.append(
+        {
+            "key": "dwd_hourly_air_temperature",
+            "title": "DWD recent hourly 2 m air temperature and humidity",
+            "url": DWD_DATASET_PAGE,
+            "dataset_page": DWD_DATASET_PAGE,
+            "state_type": "observed",
+            "licence": None,
+        }
+    )
+    return berlin
+
+
+@app.get("/api/v1/weather/stations")
+def weather_stations() -> list[dict[str, object]]:
+    return [item.model_dump(mode="json") for item in _service().stations()]
+
+
+@app.get("/api/v1/weather/observations")
+def weather_observations() -> list[dict[str, object]]:
+    return [item.model_dump(mode="json") for item in _service().observations()]
+
+
+@app.get("/api/v1/heat/snapshot")
+def heat_snapshot(at: datetime | None = Query(default=None)) -> dict[str, object]:
+    if at is not None and at.tzinfo is None:
+        raise HTTPException(422, "at must include a timezone offset")
+    return _service().snapshot(at).model_dump(mode="json")
+
+
+@app.post("/api/v1/heat/scenario", response_model=ScenarioResult)
+def heat_scenario(request: ScenarioRequest) -> ScenarioResult:
+    return _service().scenario(request)
+
+
+ui_dir = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if ui_dir.exists():
+    app.mount("/ui", StaticFiles(directory=ui_dir, html=True), name="ui")
