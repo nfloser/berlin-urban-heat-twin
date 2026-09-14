@@ -95,8 +95,12 @@ def compose_snapshot(
         limitations.append(
             f"{invalid_geometries} official feature(s) have invalid geometry and were not silently repaired."
         )
-    active_station_ids = {station.station_id for station in stations if station.active_at(timestamp)}
-    snapshot_stations = [station for station in stations if station.station_id in active_station_ids]
+    active_station_ids = {
+        station.station_id for station in stations if station.active_at(timestamp)
+    }
+    snapshot_stations = [
+        station for station in stations if station.station_id in active_station_ids
+    ]
     snapshot_observations = [o for o in latest if o.station_id in active_station_ids]
     state = HeatState(
         timestamp=timestamp,
@@ -121,7 +125,8 @@ def compose_snapshot(
 
 def apply_temperature_scenario(snapshot: HeatSnapshot, request: ScenarioRequest) -> ScenarioResult:
     base_indicator = next(
-        (i for i in snapshot.state.indicators if i.name == "observed_station_temperature_median"), None
+        (i for i in snapshot.state.indicators if i.name == "observed_station_temperature_median"),
+        None,
     )
     indicators: list[ThermalIndicator] = []
     if base_indicator is not None and isinstance(base_indicator.value, (int, float)):

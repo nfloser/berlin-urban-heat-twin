@@ -3,6 +3,7 @@
 This script uses real upstream services. It never falls back to synthetic production data.
 It is intentionally separate from deterministic unit tests because provider availability is external.
 """
+
 from __future__ import annotations
 
 import json
@@ -16,10 +17,7 @@ from berlin_heat_twin.sources import BERLIN_BBOX_WGS84, BERLIN_SOURCES
 
 def in_berlin(station: MeteorologicalStation) -> bool:
     min_lon, min_lat, max_lon, max_lat = BERLIN_BBOX_WGS84
-    return (
-        min_lat <= station.latitude <= max_lat
-        and min_lon <= station.longitude <= max_lon
-    )
+    return min_lat <= station.latitude <= max_lat and min_lon <= station.longitude <= max_lon
 
 
 def main() -> None:
@@ -44,8 +42,7 @@ def main() -> None:
     candidates = [
         station
         for station in stations
-        if in_berlin(station)
-        and (station.valid_to is None or station.valid_to >= cutoff)
+        if in_berlin(station) and (station.valid_to is None or station.valid_to >= cutoff)
     ]
     report["dwd_station_candidates"] = len(candidates)
     observation_sample = None
@@ -67,7 +64,9 @@ def main() -> None:
             }
             break
     if observation_sample is None:
-        raise RuntimeError(f"No recent Berlin DWD observation could be retrieved; attempts={failures}")
+        raise RuntimeError(
+            f"No recent Berlin DWD observation could be retrieved; attempts={failures}"
+        )
     report["dwd_observation_sample"] = observation_sample
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

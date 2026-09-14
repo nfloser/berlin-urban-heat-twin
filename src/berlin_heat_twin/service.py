@@ -23,7 +23,9 @@ class HeatService:
         self.store = JSONStore(root)
 
     def stations(self) -> list[MeteorologicalStation]:
-        return [MeteorologicalStation.model_validate(item) for item in self.store.read("stations", [])]
+        return [
+            MeteorologicalStation.model_validate(item) for item in self.store.read("stations", [])
+        ]
 
     def observations(self) -> list[MeteorologicalObservation]:
         return [
@@ -46,7 +48,9 @@ class HeatService:
             official_areas=self.official_areas(),
         )
 
-    def scenario(self, request: ScenarioRequest, timestamp: datetime | None = None) -> ScenarioResult:
+    def scenario(
+        self, request: ScenarioRequest, timestamp: datetime | None = None
+    ) -> ScenarioResult:
         return apply_temperature_scenario(self.snapshot(timestamp), request)
 
     def cache_models(self, key: str, values: list[Any]) -> Path:

@@ -7,7 +7,12 @@ from berlin_heat_twin.domain import MeteorologicalObservation, Provenance, State
 
 
 def provenance() -> Provenance:
-    return Provenance(source="DWD", dataset="fixture", source_url="https://example.test", state_type=StateType.OBSERVED)
+    return Provenance(
+        source="DWD",
+        dataset="fixture",
+        source_url="https://example.test",
+        state_type=StateType.OBSERVED,
+    )
 
 
 def test_observation_requires_timezone() -> None:

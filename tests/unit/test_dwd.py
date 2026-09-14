@@ -16,7 +16,9 @@ def test_station_metadata_parses_validity_and_coordinates() -> None:
 
 
 def test_observations_parse_missing_values_and_utc() -> None:
-    observations = DWDProvider.parse_observation_csv((FIXTURES / "dwd_observations.txt").read_text())
+    observations = DWDProvider.parse_observation_csv(
+        (FIXTURES / "dwd_observations.txt").read_text()
+    )
     assert observations[0].air_temperature_c == 25.1
     assert observations[0].relative_humidity_pct == 48.0
     assert observations[0].timestamp.tzinfo == UTC

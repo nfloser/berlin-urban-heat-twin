@@ -48,8 +48,12 @@ class BerlinWFSProvider:
                 UrbanClimateLayer(
                     source_key=source.key,
                     type_name=name_node.text.strip(),
-                    title=title_node.text.strip() if title_node is not None and title_node.text else None,
-                    default_crs=crs_node.text.strip() if crs_node is not None and crs_node.text else None,
+                    title=title_node.text.strip()
+                    if title_node is not None and title_node.text
+                    else None,
+                    default_crs=crs_node.text.strip()
+                    if crs_node is not None and crs_node.text
+                    else None,
                     provenance=provenance,
                 )
             )

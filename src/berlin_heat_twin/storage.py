@@ -17,7 +17,9 @@ class JSONStore:
 
     def write(self, name: str, payload: Any) -> Path:
         path = self._path(name)
-        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+        )
         return path
 
     def read(self, name: str, default: Any) -> Any:

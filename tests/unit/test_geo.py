@@ -12,7 +12,10 @@ def test_crs_transform_round_trip_point() -> None:
 
 
 def test_metric_area_rejects_geographic_crs() -> None:
-    polygon = {"type": "Polygon", "coordinates": [[[13, 52], [14, 52], [14, 53], [13, 53], [13, 52]]]}
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [[[13, 52], [14, 52], [14, 53], [13, 53], [13, 52]]],
+    }
     with pytest.raises(ValueError, match="projected CRS"):
         area_square_metres(polygon, "EPSG:4326")
 

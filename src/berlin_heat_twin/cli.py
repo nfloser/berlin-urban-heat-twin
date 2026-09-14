@@ -34,7 +34,9 @@ def main() -> None:
     ingest_climate = sub.add_parser("ingest-climate")
     ingest_climate.add_argument("source", choices=BERLIN_SOURCES)
     ingest_climate.add_argument("type_name")
-    ingest_climate.add_argument("--limit", type=int, default=int(os.getenv("HEAT_TWIN_MAX_WFS_FEATURES", "5000")))
+    ingest_climate.add_argument(
+        "--limit", type=int, default=int(os.getenv("HEAT_TWIN_MAX_WFS_FEATURES", "5000"))
+    )
 
     args = parser.parse_args()
     timeout = float(os.getenv("HEAT_TWIN_HTTP_TIMEOUT_SECONDS", "30"))
@@ -61,7 +63,9 @@ def main() -> None:
             stations = [s for s in stations if _berlin_station(s)]
         if args.command == "dwd-stations":
             for station in stations:
-                print(f"{station.station_id}\t{station.name}\t{station.latitude:.4f}\t{station.longitude:.4f}")
+                print(
+                    f"{station.station_id}\t{station.name}\t{station.latitude:.4f}\t{station.longitude:.4f}"
+                )
             return
         observations = []
         successful_stations = []
@@ -75,7 +79,9 @@ def main() -> None:
             successful_stations.append(station)
         service.cache_models("stations", successful_stations)
         service.cache_models("observations", observations)
-        print(f"Cached {len(observations)} observations from {len(successful_stations)} active station(s).")
+        print(
+            f"Cached {len(observations)} observations from {len(successful_stations)} active station(s)."
+        )
         return
 
     if args.command == "ingest-climate":

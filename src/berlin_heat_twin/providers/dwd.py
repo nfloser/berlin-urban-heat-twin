@@ -74,7 +74,9 @@ class DWDProvider:
         return None if value in _MISSING else value
 
     @staticmethod
-    def parse_observation_csv(text: str, retrieved_at: datetime | None = None) -> list[MeteorologicalObservation]:
+    def parse_observation_csv(
+        text: str, retrieved_at: datetime | None = None
+    ) -> list[MeteorologicalObservation]:
         reader = csv.DictReader(io.StringIO(text), delimiter=";")
         observations: list[MeteorologicalObservation] = []
         provenance = DWDProvider._provenance(retrieved_at)
@@ -87,7 +89,9 @@ class DWDProvider:
             timestamp = datetime.strptime(timestamp_raw, "%Y%m%d%H").replace(tzinfo=UTC)
             temp = DWDProvider._value(row.get("TT_TU") or row.get("LUFTTEMPERATUR"))
             humidity = DWDProvider._value(row.get("RF_TU") or row.get("REL_FEUCHTE"))
-            quality = QualityFlag.MISSING if temp is None and humidity is None else QualityFlag.VERIFIED
+            quality = (
+                QualityFlag.MISSING if temp is None and humidity is None else QualityFlag.VERIFIED
+            )
             observations.append(
                 MeteorologicalObservation(
                     station_id=station_id,
@@ -101,9 +105,15 @@ class DWDProvider:
         return observations
 
     @staticmethod
-    def parse_zip(content: bytes, retrieved_at: datetime | None = None) -> list[MeteorologicalObservation]:
+    def parse_zip(
+        content: bytes, retrieved_at: datetime | None = None
+    ) -> list[MeteorologicalObservation]:
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
-            candidates = [name for name in archive.namelist() if name.lower().startswith("produkt") and name.endswith(".txt")]
+            candidates = [
+                name
+                for name in archive.namelist()
+                if name.lower().startswith("produkt") and name.endswith(".txt")
+            ]
             if not candidates:
                 raise ValueError("DWD archive contains no produkt*.txt observation file")
             text = archive.read(candidates[0]).decode("latin-1")

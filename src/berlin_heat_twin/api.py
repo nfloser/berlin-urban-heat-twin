@@ -54,8 +54,6 @@ def sources() -> list[dict[str, str | None]]:
     return berlin
 
 
-
-
 @app.get("/api/v1/climate/layers/{source_key}")
 def climate_layers(source_key: str) -> list[dict[str, object]]:
     source = BERLIN_SOURCES.get(source_key)
