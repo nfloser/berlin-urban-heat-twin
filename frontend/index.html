@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berlin Urban Heat Twin</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">BERLIN URBAN INTELLIGENCE</p><h1>Urban Heat Twin</h1></div>
+      <span id="status" class="badge">Loading</span>
+    </header>
+    <section class="hero-grid">
+      <article class="panel"><p class="label">Observed station median</p><strong id="temperature">—</strong><p id="freshness">No cached observations</p></article>
+      <article class="panel"><p class="label">Official climate features</p><strong id="features">0</strong><p>Berlin Umweltatlas · officially modelled</p></article>
+      <article class="panel"><p class="label">Data contract</p><strong>4 states</strong><p>observed · official_modelled · derived · scenario</p></article>
+    </section>
+    <section class="map-panel"><div id="map"></div><aside id="legend"><h2>Layers</h2><label><input id="stationsToggle" type="checkbox" checked /> DWD stations</label><label><input id="areasToggle" type="checkbox" checked /> Official climate areas</label><div class="provenance"><b>Scientific guardrail</b><p>No station interpolation is rendered as an exact city-wide live temperature surface.</p></div></aside></section>
+    <section class="panel methodology"><h2>Current heat state</h2><p id="limitations">Loading provenance and limitations…</p></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
