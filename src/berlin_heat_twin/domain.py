@@ -206,6 +206,24 @@ class GroupedAreaSummary(BaseModel):
     uncertainty: list[str] = Field(default_factory=list)
 
 
+class NumericAttributeSummary(BaseModel):
+    schema_version: str = "1.0"
+    generated_at: datetime
+    state_type: StateType = StateType.DERIVED
+    source_key: str | None = None
+    layer_type: str | None = None
+    attribute: str
+    unit: str
+    count: int = Field(ge=0)
+    skipped_missing_or_non_numeric: int = Field(ge=0)
+    minimum: float | None = None
+    median: float | None = None
+    maximum: float | None = None
+    methodology: str
+    provenance: Provenance
+    uncertainty: list[str] = Field(default_factory=list)
+
+
 class MatchedClimateArea(BaseModel):
     area_id: str
     source_key: str | None = None
