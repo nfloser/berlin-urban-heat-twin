@@ -1,6 +1,11 @@
 from datetime import UTC, datetime
 
-from berlin_heat_twin.analytics import area_summary, grouped_area_summary, station_climate_overlap
+from berlin_heat_twin.analytics import (
+    area_summary,
+    grouped_area_summary,
+    numeric_attribute_summary,
+    station_climate_overlap,
+)
 from berlin_heat_twin.domain import (
     ClimateZone,
     MeteorologicalObservation,
@@ -46,6 +51,21 @@ def test_area_summary_calculates_metric_area_by_official_category() -> None:
     assert {item.category for item in summary.categories} == {"hoch", "niedrig"}
     assert all(item.area_m2 > 0 for item in summary.categories)
     assert "EPSG:25833" in summary.methodology
+
+
+def test_numeric_summary_uses_official_values_without_reclassification() -> None:
+    first = _zone("1", 13.3, "hoch", "Mitte")
+    second = _zone("2", 13.32, "niedrig", "Pankow")
+    first.attributes["pet14h"] = 35.0
+    second.attributes["pet14h"] = 38.0
+    summary = numeric_attribute_summary([first, second], attribute="pet14h", unit="degC")
+    assert summary.state_type == StateType.DERIVED
+    assert summary.count == 2
+    assert summary.minimum == 35.0
+    assert summary.median == 36.5
+    assert summary.maximum == 38.0
+    assert summary.unit == "degC"
+    assert "no reclassification" in summary.methodology.lower()
 
 
 def test_grouped_summary_can_express_district_level_results_without_inventing_districts() -> None:
