@@ -184,6 +184,25 @@ def analytics_area_summary(
     )
 
 
+@app.get("/api/v1/analytics/numeric-summary")
+def analytics_numeric_summary(
+    attribute: str,
+    unit: str,
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> dict[str, object]:
+    try:
+        result = _service().numeric_thermal_summary(
+            attribute=attribute,
+            unit=unit,
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return result.model_dump(mode="json")
+
+
 @app.get("/api/v1/analytics/grouped-area-summary")
 def analytics_grouped_area_summary(
     classification_attribute: str,
