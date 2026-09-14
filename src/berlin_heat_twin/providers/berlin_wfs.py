@@ -67,6 +67,34 @@ class BerlinWFSProvider:
         return self.parse_capabilities(response.text, self.source)
 
     @staticmethod
+    def parse_feature_schema(xml_text: str) -> dict[str, str]:
+        root = ElementTree.fromstring(xml_text)
+        xsd_element = "{http://www.w3.org/2001/XMLSchema}element"
+        fields: dict[str, str] = {}
+        for element in root.findall(f".//{xsd_element}"):
+            name = element.attrib.get("name")
+            declared_type = element.attrib.get("type")
+            if name and declared_type:
+                fields[name] = declared_type
+        if not fields:
+            raise ValueError("WFS DescribeFeatureType contains no typed fields")
+        return fields
+
+    def describe_feature_type(self, type_name: str) -> dict[str, str]:
+        if not type_name:
+            raise ValueError("type_name is required")
+        params = {
+            "service": "WFS",
+            "request": "DescribeFeatureType",
+            "version": "2.0.0",
+            "typeNames": type_name,
+        }
+        with httpx.Client(timeout=self.timeout_seconds, follow_redirects=True) as client:
+            response = client.get(self.source.url, params=params)
+            response.raise_for_status()
+        return self.parse_feature_schema(response.text)
+
+    @staticmethod
     def parse_feature_collection(
         payload: dict[str, Any],
         source: SourceConfig,
