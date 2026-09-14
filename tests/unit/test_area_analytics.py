@@ -26,7 +26,9 @@ def _zone(zone_id: str, x0: float, classification: str, district: str) -> Climat
         layer_type="assessment:test",
         geometry={
             "type": "Polygon",
-            "coordinates": [[[x0, 52.5], [x0 + 0.01, 52.5], [x0 + 0.01, 52.51], [x0, 52.51], [x0, 52.5]]],
+            "coordinates": [
+                [[x0, 52.5], [x0 + 0.01, 52.5], [x0 + 0.01, 52.51], [x0, 52.51], [x0, 52.5]]
+            ],
         },
         crs="EPSG:4326",
         attributes={"phk_gesamt": classification, "bezirk": district},
