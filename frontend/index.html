@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Research-oriented Berlin urban heat digital twin using measured DWD observations and official Berlin urban-climate layers." />
   <title>Berlin Urban Heat Twin</title>
   <link rel="preconnect" href="https://unpkg.com" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -11,16 +12,72 @@
 <body>
   <main>
     <header>
-      <div><p class="eyebrow">BERLIN URBAN INTELLIGENCE</p><h1>Urban Heat Twin</h1></div>
-      <span id="status" class="badge">Loading</span>
+      <div>
+        <p class="eyebrow">BERLIN URBAN INTELLIGENCE · RESEARCH COMPONENT</p>
+        <h1>Urban Heat Twin</h1>
+        <p class="subtitle">Measured weather observations and official urban-climate evidence, kept scientifically separate.</p>
+      </div>
+      <div class="status-stack">
+        <span id="status" class="badge">Loading</span>
+        <span id="timestamp" class="timestamp">No timestamp available</span>
+      </div>
     </header>
-    <section class="hero-grid">
-      <article class="panel"><p class="label">Observed station median</p><strong id="temperature">—</strong><p id="freshness">No cached observations</p></article>
-      <article class="panel"><p class="label">Official climate features</p><strong id="features">0</strong><p>Berlin Umweltatlas · officially modelled</p></article>
-      <article class="panel"><p class="label">Data contract</p><strong>4 states</strong><p>observed · official_modelled · derived · scenario</p></article>
+
+    <section class="hero-grid" aria-label="Current heat state summary">
+      <article class="panel metric-card">
+        <p class="label">Derived station median</p>
+        <strong id="temperature">—</strong>
+        <p id="freshness">No cached observations</p>
+        <span class="state-pill derived">DERIVED FROM MEASURED POINTS</span>
+      </article>
+      <article class="panel metric-card">
+        <p class="label">Cached official climate features</p>
+        <strong id="features">0</strong>
+        <p id="layerCount">0 cached source/layer combinations</p>
+        <span class="state-pill modelled">OFFICIALLY MODELLED</span>
+      </article>
+      <article class="panel metric-card">
+        <p class="label">Epistemic state contract</p>
+        <strong>4 states</strong>
+        <p>observed · official_modelled · derived · scenario</p>
+        <span class="state-pill">NO STATE COLLAPSE</span>
+      </article>
     </section>
-    <section class="map-panel"><div id="map"></div><aside id="legend"><h2>Layers</h2><label><input id="stationsToggle" type="checkbox" checked /> DWD stations</label><label><input id="areasToggle" type="checkbox" checked /> Official climate areas</label><div class="provenance"><b>Scientific guardrail</b><p>No station interpolation is rendered as an exact city-wide live temperature surface.</p></div></aside></section>
-    <section class="panel methodology"><h2>Current heat state</h2><p id="limitations">Loading provenance and limitations…</p></section>
+
+    <section class="map-panel">
+      <div id="map" aria-label="Interactive map of Berlin climate areas and DWD station observations"></div>
+      <aside id="legend">
+        <div>
+          <p class="eyebrow">MAP CONTROL</p>
+          <h2>Evidence layers</h2>
+          <label><input id="stationsToggle" type="checkbox" checked /> <span class="legend-dot station-dot"></span>DWD station observations</label>
+          <label><input id="areasToggle" type="checkbox" checked /> <span class="legend-dot area-dot"></span>Official climate areas</label>
+        </div>
+        <div class="legend-key">
+          <p><b>MEASURED</b><br />Point observation from DWD.</p>
+          <p><b>OFFICIALLY MODELLED</b><br />Berlin Umweltatlas model/reference condition.</p>
+          <p><b>DERIVED</b><br />Transparent calculation by this project.</p>
+          <p><b>HYPOTHETICAL</b><br />Caller-defined scenario; never a forecast.</p>
+        </div>
+        <div class="provenance">
+          <b>Scientific guardrail</b>
+          <p>No station interpolation is rendered as an exact city-wide live temperature surface.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel methodology">
+        <p class="eyebrow">LIMITATIONS</p>
+        <h2>Current heat state</h2>
+        <p id="limitations">Loading provenance and limitations…</p>
+      </article>
+      <article class="panel sources-panel">
+        <p class="eyebrow">PROVENANCE</p>
+        <h2>Configured primary sources</h2>
+        <div id="sourceList" class="source-list">Loading source metadata…</div>
+      </article>
+    </section>
   </main>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="./src/app.js"></script>
