@@ -1,0 +1,3 @@
+Stations_id von_datum bis_datum Stationshoehe geoBreite geoLaenge Stationsname Bundesland
+00403 19500101 20261231 51 52.4537 13.3017 Berlin-Dahlem Berlin
+99999 20000101 20100101 10 51.0000 10.0000 Old-Station Testland
