@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from pyproj import CRS, Transformer
 from shapely.geometry import mapping, shape
@@ -25,7 +25,7 @@ def transform_geometry(
     target = CRS.from_user_input(target_crs)
     transformer = Transformer.from_crs(source, target, always_xy=True)
     transformed = transform(transformer.transform, shape(geometry))
-    return cast(dict[str, Any], mapping(transformed))
+    return mapping(transformed)
 
 
 def area_square_metres(geometry: dict[str, Any], crs: str) -> float:
