@@ -20,6 +20,8 @@ jobs:
           git diff --check
           git diff --exit-code
       - run: mypy src
+      - name: Validate OpenAPI, integration schemas, docs and repository hygiene
+        run: python scripts/repository_audit.py
 
   frontend:
     runs-on: ubuntu-latest
