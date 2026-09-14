@@ -1,14 +1,18 @@
 # Testing
 
-The repository uses Red → Green → Refactor boundaries. Tests are colocated by behaviour rather than implementation detail.
+The repository uses Red → Green → Refactor for meaningful behaviour changes. Deterministic tests do not require external network access; provider parsing is fixture-driven, while live availability is checked separately.
 
-Run backend tests:
+Backend gate:
 
 ```bash
 pytest
+ruff check .
+ruff format --check .
+mypy src
+python scripts/repository_audit.py
 ```
 
-Run frontend tests/build:
+Frontend gate:
 
 ```bash
 cd frontend
@@ -16,10 +20,25 @@ npm test
 npm run build
 ```
 
-Full developer gate:
+Docker gate:
+
+```bash
+docker compose config
+docker build -t berlin-urban-heat-twin .
+```
+
+Live authoritative-source validation:
+
+```bash
+python scripts/live_smoke.py
+```
+
+Full deterministic developer gate:
 
 ```bash
 make quality
 ```
 
-Provider tests use fixtures only. Production code contains no synthetic meteorological measurements. Fixtures are explicitly confined to `tests/fixtures`.
+`repository_audit.py` checks required documentation, OpenAPI paths, integration-schema fields, absence of production placeholder markers and absence of committed runtime cache payloads.
+
+Production code contains no generated/synthetic meteorological observations. Synthetic values are confined to explicit unit-test fixtures and objects.
