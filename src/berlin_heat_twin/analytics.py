@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from datetime import UTC, datetime
 from statistics import median
@@ -15,6 +16,7 @@ from berlin_heat_twin.domain import (
     MatchedClimateArea,
     MeteorologicalObservation,
     MeteorologicalStation,
+    NumericAttributeSummary,
     Provenance,
     QualityFlag,
     ScenarioRequest,
@@ -131,15 +133,15 @@ def compose_snapshot(
     )
 
 
-def _summary_provenance(attribute: str) -> Provenance:
+def _summary_provenance(attribute: str, summary_kind: str = "area") -> Provenance:
     return Provenance(
         source="Berlin Urban Heat Twin",
-        dataset=f"derived area summary for official attribute {attribute}",
-        source_url="internal://derived/area-summary",
+        dataset=f"derived {summary_kind} summary for official attribute {attribute}",
+        source_url=f"internal://derived/{summary_kind}-summary",
         state_type=StateType.DERIVED,
         methodology=(
-            "Areas are calculated after geometry transformation to EPSG:25833 and grouped by an existing "
-            "official attribute value. No project-specific thermal class is inferred."
+            "The project summarizes values already present in official source features; "
+            "no undocumented thermal reclassification is introduced."
         ),
     )
 
@@ -198,6 +200,54 @@ def area_summary(zones: list[ClimateZone], *, attribute: str) -> AreaSummary:
         uncertainty=[
             "Area totals inherit the geometry and classification assumptions of the selected official layer.",
             "Overlapping source features, if present, are not dissolved and can therefore overlap in totals.",
+        ],
+    )
+
+
+def numeric_attribute_summary(
+    zones: list[ClimateZone], *, attribute: str, unit: str
+) -> NumericAttributeSummary:
+    if not attribute:
+        raise ValueError("attribute is required")
+    if not unit:
+        raise ValueError("unit is required and must come from the source methodology")
+    values: list[float] = []
+    skipped = 0
+    for zone in zones:
+        raw = zone.attributes.get(attribute)
+        if raw is None or isinstance(raw, bool):
+            skipped += 1
+            continue
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            skipped += 1
+            continue
+        if not math.isfinite(value):
+            skipped += 1
+            continue
+        values.append(value)
+    source_keys = {zone.source_key for zone in zones if zone.source_key is not None}
+    layer_types = {zone.layer_type for zone in zones if zone.layer_type is not None}
+    return NumericAttributeSummary(
+        generated_at=datetime.now(UTC),
+        source_key=next(iter(source_keys)) if len(source_keys) == 1 else None,
+        layer_type=next(iter(layer_types)) if len(layer_types) == 1 else None,
+        attribute=attribute,
+        unit=unit,
+        count=len(values),
+        skipped_missing_or_non_numeric=skipped,
+        minimum=min(values) if values else None,
+        median=float(median(values)) if values else None,
+        maximum=max(values) if values else None,
+        methodology=(
+            "Count, minimum, median and maximum of the requested numeric source attribute; "
+            "no reclassification, interpolation or invented threshold is applied."
+        ),
+        provenance=_summary_provenance(attribute, "numeric-attribute"),
+        uncertainty=[
+            "The caller-provided unit must be verified against the official source metadata.",
+            "The summary is feature-based and is not area-weighted unless the source features themselves represent equal support areas.",
         ],
     )
 
