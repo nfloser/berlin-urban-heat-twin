@@ -7,14 +7,14 @@ from typing import cast
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
-from berlin_heat_twin.domain import ScenarioRequest, ScenarioResult
+from berlin_heat_twin.domain import ScenarioRequest, ScenarioResult, SpatialQueryRequest
 from berlin_heat_twin.providers.berlin_wfs import BerlinWFSProvider
 from berlin_heat_twin.service import HeatService
 from berlin_heat_twin.sources import BERLIN_SOURCES, DWD_DATASET_PAGE
 
 app = FastAPI(
     title="Berlin Urban Heat Twin API",
-    version="1.0.0",
+    version="1.1.0",
     description="Research API separating measured, officially modelled, derived and scenario heat information.",
 )
 app.state.service = HeatService()
@@ -22,6 +22,11 @@ app.state.service = HeatService()
 
 def _service() -> HeatService:
     return cast(HeatService, app.state.service)
+
+
+def _validate_aware(value: datetime | None, name: str) -> None:
+    if value is not None and value.tzinfo is None:
+        raise HTTPException(422, f"{name} must include a timezone offset")
 
 
 @app.get("/api/v1/health")
@@ -67,10 +72,73 @@ def climate_layers(source_key: str) -> list[dict[str, object]]:
     return [layer.model_dump(mode="json") for layer in layers]
 
 
+@app.get("/api/v1/climate/areas")
+def climate_areas(
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> list[dict[str, object]]:
+    return [
+        item.model_dump(mode="json")
+        for item in _service().official_areas(source_key=source_key, layer_type=layer_type)
+    ]
+
+
+@app.get("/api/v1/climate/query/point")
+def climate_query_point(
+    longitude: float = Query(ge=-180, le=180),
+    latitude: float = Query(ge=-90, le=90),
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> list[dict[str, object]]:
+    return [
+        item.model_dump(mode="json")
+        for item in _service().climate_at_point(
+            longitude=longitude,
+            latitude=latitude,
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+    ]
+
+
+@app.post("/api/v1/climate/query/polygon")
+def climate_query_polygon(request: SpatialQueryRequest) -> list[dict[str, object]]:
+    try:
+        result = _service().climate_intersecting_polygon(
+            request.geometry,
+            request.crs,
+            source_key=request.source_key,
+            layer_type=request.layer_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return [item.model_dump(mode="json") for item in result]
+
+
+@app.get("/api/v1/climate/areas/by-classification")
+def climate_areas_by_classification(
+    attribute: str,
+    value: list[str] = Query(),
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> list[dict[str, object]]:
+    if not value:
+        raise HTTPException(422, "at least one value is required")
+    try:
+        result = _service().climate_by_classification(
+            attribute=attribute,
+            values=set(value),
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return [item.model_dump(mode="json") for item in result]
+
+
 @app.get("/api/v1/heat/state")
 def heat_state(at: datetime | None = Query(default=None)) -> dict[str, object]:
-    if at is not None and at.tzinfo is None:
-        raise HTTPException(422, "at must include a timezone offset")
+    _validate_aware(at, "at")
     return _service().snapshot(at).state.model_dump(mode="json")
 
 
@@ -85,14 +153,70 @@ def weather_stations() -> list[dict[str, object]]:
 
 
 @app.get("/api/v1/weather/observations")
-def weather_observations() -> list[dict[str, object]]:
-    return [item.model_dump(mode="json") for item in _service().observations()]
+def weather_observations(
+    station_id: str | None = Query(default=None),
+    start: datetime | None = Query(default=None),
+    end: datetime | None = Query(default=None),
+) -> list[dict[str, object]]:
+    _validate_aware(start, "start")
+    _validate_aware(end, "end")
+    try:
+        result = _service().observation_history(station_id=station_id, start=start, end=end)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return [item.model_dump(mode="json") for item in result]
+
+
+@app.get("/api/v1/analytics/area-summary")
+def analytics_area_summary(
+    attribute: str,
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> dict[str, object]:
+    return _service().thermal_area_summary(
+        attribute=attribute,
+        source_key=source_key,
+        layer_type=layer_type,
+    ).model_dump(mode="json")
+
+
+@app.get("/api/v1/analytics/grouped-area-summary")
+def analytics_grouped_area_summary(
+    classification_attribute: str,
+    group_attribute: str,
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> dict[str, object]:
+    return _service().grouped_thermal_area_summary(
+        classification_attribute=classification_attribute,
+        group_attribute=group_attribute,
+        source_key=source_key,
+        layer_type=layer_type,
+    ).model_dump(mode="json")
+
+
+@app.get("/api/v1/analytics/station-climate-overlap")
+def analytics_station_climate_overlap(
+    classification_attribute: str,
+    at: datetime | None = Query(default=None),
+    source_key: str | None = Query(default=None),
+    layer_type: str | None = Query(default=None),
+) -> list[dict[str, object]]:
+    _validate_aware(at, "at")
+    return [
+        item.model_dump(mode="json")
+        for item in _service().overlap(
+            classification_attribute=classification_attribute,
+            timestamp=at,
+            source_key=source_key,
+            layer_type=layer_type,
+        )
+    ]
 
 
 @app.get("/api/v1/heat/snapshot")
 def heat_snapshot(at: datetime | None = Query(default=None)) -> dict[str, object]:
-    if at is not None and at.tzinfo is None:
-        raise HTTPException(422, "at must include a timezone offset")
+    _validate_aware(at, "at")
     return _service().snapshot(at).model_dump(mode="json")
 
 

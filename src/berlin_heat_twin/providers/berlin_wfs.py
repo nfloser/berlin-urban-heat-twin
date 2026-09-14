@@ -68,7 +68,10 @@ class BerlinWFSProvider:
 
     @staticmethod
     def parse_feature_collection(
-        payload: dict[str, Any], source: SourceConfig, crs: str = "EPSG:4326"
+        payload: dict[str, Any],
+        source: SourceConfig,
+        crs: str = "EPSG:4326",
+        type_name: str | None = None,
     ) -> list[ClimateZone]:
         if payload.get("type") != "FeatureCollection":
             raise ValueError("expected GeoJSON FeatureCollection")
@@ -80,16 +83,25 @@ class BerlinWFSProvider:
             state_type=StateType.OFFICIAL_MODELLED,
             license=source.licence,
         )
-        for index, feature in enumerate(payload.get("features", [])):
+        features = payload.get("features", [])
+        if not isinstance(features, list):
+            raise ValueError("GeoJSON features must be a list")
+        for index, feature in enumerate(features):
+            if not isinstance(feature, dict):
+                raise ValueError("GeoJSON feature must be an object")
             geometry = feature.get("geometry")
             if geometry is None:
                 continue
+            if not isinstance(geometry, dict):
+                raise ValueError("GeoJSON geometry must be an object")
             valid, _ = validate_geometry(geometry)
             properties = dict(feature.get("properties") or {})
             feature_id = str(feature.get("id") or properties.get("gml_id") or index)
             zones.append(
                 ClimateZone(
                     zone_id=feature_id,
+                    source_key=source.key,
+                    layer_type=type_name,
                     geometry=geometry,
                     crs=crs,
                     attributes=properties,
@@ -115,4 +127,6 @@ class BerlinWFSProvider:
             response = client.get(self.source.url, params=params)
             response.raise_for_status()
             payload = response.json()
-        return self.parse_feature_collection(payload, self.source)
+        return self.parse_feature_collection(
+            payload, self.source, crs="EPSG:4326", type_name=type_name
+        )

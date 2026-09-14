@@ -56,6 +56,8 @@ class UrbanClimateLayer(BaseModel):
 
 class ClimateZone(BaseModel):
     zone_id: str
+    source_key: str | None = None
+    layer_type: str | None = None
     geometry: dict[str, Any]
     crs: str
     attributes: dict[str, Any]
@@ -151,6 +153,79 @@ class ThermalArea(BaseModel):
     provenance: Provenance
     quality: QualityFlag
     uncertainty: list[str] = Field(default_factory=list)
+
+
+class AreaCategoryStatistic(BaseModel):
+    category: str
+    feature_count: int = Field(ge=0)
+    area_m2: float = Field(ge=0)
+    fraction_of_analysed_area: float = Field(ge=0, le=1)
+
+
+class AreaSummary(BaseModel):
+    schema_version: str = "1.0"
+    generated_at: datetime
+    state_type: StateType = StateType.DERIVED
+    source_key: str | None = None
+    layer_type: str | None = None
+    attribute: str
+    analysed_feature_count: int = Field(ge=0)
+    skipped_invalid_geometries: int = Field(ge=0)
+    skipped_missing_attribute: int = Field(ge=0)
+    total_area_m2: float = Field(ge=0)
+    categories: list[AreaCategoryStatistic]
+    methodology: str
+    provenance: Provenance
+    uncertainty: list[str] = Field(default_factory=list)
+
+
+class AreaGroupSummary(BaseModel):
+    group: str
+    summary: AreaSummary
+
+
+class GroupedAreaSummary(BaseModel):
+    schema_version: str = "1.0"
+    generated_at: datetime
+    state_type: StateType = StateType.DERIVED
+    classification_attribute: str
+    group_attribute: str
+    groups: list[AreaGroupSummary]
+    methodology: str
+    uncertainty: list[str] = Field(default_factory=list)
+
+
+class MatchedClimateArea(BaseModel):
+    area_id: str
+    source_key: str | None = None
+    layer_type: str | None = None
+    classification: str | None = None
+    provenance: Provenance
+
+
+class StationClimateOverlap(BaseModel):
+    schema_version: str = "1.0"
+    timestamp: datetime
+    station_id: str
+    station_name: str
+    longitude: float
+    latitude: float
+    air_temperature_c: float | None = None
+    relative_humidity_pct: float | None = None
+    observation_quality: QualityFlag
+    observation_provenance: Provenance
+    matched_areas: list[MatchedClimateArea]
+    methodology: str = (
+        "Point-in-polygon overlap between latest measured station observations and official climate areas; "
+        "no spatial interpolation is performed."
+    )
+
+
+class SpatialQueryRequest(BaseModel):
+    geometry: dict[str, Any]
+    crs: str = "EPSG:4326"
+    source_key: str | None = None
+    layer_type: str | None = None
 
 
 class ScenarioRequest(BaseModel):

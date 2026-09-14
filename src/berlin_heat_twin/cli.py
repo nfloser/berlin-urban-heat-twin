@@ -90,9 +90,11 @@ def main() -> None:
         if args.type_name not in discovered:
             raise SystemExit(f"Layer {args.type_name!r} not present in current WFS capabilities")
         areas = climate_provider.fetch_features(args.type_name, args.limit)
-        service.cache_models(f"areas-{args.source}", areas)
+        service.cache_climate_layer(args.source, args.type_name, areas)
         invalid = sum(not area.geometry_valid for area in areas)
-        print(f"Cached {len(areas)} feature(s); invalid geometries: {invalid}.")
+        print(
+            f"Cached layer {args.type_name!r} with {len(areas)} feature(s); invalid geometries: {invalid}."
+        )
 
 
 if __name__ == "__main__":
