@@ -34,7 +34,9 @@ def main() -> None:
         schema = provider.describe_feature_type(sample_layer.type_name)
         features = provider.fetch_features(sample_layer.type_name, limit=5)
         if not features:
-            raise RuntimeError(f"Berlin WFS layer {sample_layer.type_name} returned no sample features")
+            raise RuntimeError(
+                f"Berlin WFS layer {sample_layer.type_name} returned no sample features"
+            )
         wrong_state = [
             feature.zone_id
             for feature in features
@@ -67,7 +69,9 @@ def main() -> None:
         and (station.valid_to is None or station.valid_to >= cutoff)
     ]
     if not candidates:
-        raise RuntimeError("DWD metadata returned no currently/recently active Berlin station candidates")
+        raise RuntimeError(
+            "DWD metadata returned no currently/recently active Berlin station candidates"
+        )
     report["dwd_station_candidates"] = len(candidates)
 
     observation_sample = None
