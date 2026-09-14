@@ -57,9 +57,7 @@ def test_point_polygon_and_classification_queries(tmp_path: Path) -> None:
     assert polygon.status_code == 200
     assert polygon.json()[0]["zone_id"] == "area.1"
 
-    selected = client.get(
-        "/api/v1/climate/areas/by-classification?attribute=phk_gesamt&value=hoch"
-    )
+    selected = client.get("/api/v1/climate/areas/by-classification?attribute=phk_gesamt&value=hoch")
     assert selected.status_code == 200
     assert [item["zone_id"] for item in selected.json()] == ["area.1"]
 
