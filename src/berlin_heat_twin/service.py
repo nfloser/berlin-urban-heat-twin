@@ -10,6 +10,7 @@ from berlin_heat_twin.analytics import (
     area_summary,
     compose_snapshot,
     grouped_area_summary,
+    numeric_attribute_summary,
     station_climate_overlap,
 )
 from berlin_heat_twin.domain import (
@@ -19,6 +20,7 @@ from berlin_heat_twin.domain import (
     HeatSnapshot,
     MeteorologicalObservation,
     MeteorologicalStation,
+    NumericAttributeSummary,
     ScenarioRequest,
     ScenarioResult,
     StationClimateOverlap,
@@ -141,6 +143,20 @@ class HeatService:
         return area_summary(
             self.official_areas(source_key=source_key, layer_type=layer_type),
             attribute=attribute,
+        )
+
+    def numeric_thermal_summary(
+        self,
+        *,
+        attribute: str,
+        unit: str,
+        source_key: str | None = None,
+        layer_type: str | None = None,
+    ) -> NumericAttributeSummary:
+        return numeric_attribute_summary(
+            self.official_areas(source_key=source_key, layer_type=layer_type),
+            attribute=attribute,
+            unit=unit,
         )
 
     def grouped_thermal_area_summary(
