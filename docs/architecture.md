@@ -1,6 +1,6 @@
 # Architecture
 
-The architecture separates source acquisition, scientific semantics, analytics and presentation so external provider details cannot silently change the meaning of heat indicators.
+Source retrieval, data semantics, analysis and presentation are separate. Provider-specific fields cannot silently change the meaning of heat indicators.
 
 1. **Providers** retrieve Berlin WFS capabilities, `DescribeFeatureType` schemas and GeoJSON features, plus DWD station metadata and recent hourly observations.
 2. **Domain models** enforce timezone awareness, meteorological ranges, provenance, quality and the four epistemic states.
@@ -13,4 +13,4 @@ The architecture separates source acquisition, scientific semantics, analytics a
 
 API geometries use `EPSG:4326`. Area calculations transform to `EPSG:25833`. Invalid source geometry is preserved with `geometry_valid=false`; operations that need valid geometry skip it and report that limitation rather than repairing it invisibly.
 
-The project intentionally contains no implicit interpolation layer between DWD points and Berlin-wide polygons.
+DWD station readings are not implicitly interpolated into Berlin-wide polygons.
