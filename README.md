@@ -1,15 +1,15 @@
 # Berlin Urban Heat Twin
 
-A research-oriented urban heat digital twin for Berlin that combines genuine meteorological observations with official urban-climate information while preserving provenance, uncertainty and epistemic state.
+Berlin Urban Heat Twin combines measured weather data with official Berlin urban-climate datasets for research. Results retain their sources, uncertainty and data states.
 
-The project deliberately distinguishes four states throughout models, API and UI:
+The models, API and UI distinguish four data states:
 
 - **MEASURED (`observed`)** — DWD station observations.
 - **OFFICIALLY MODELLED (`official_modelled`)** — Berlin Environmental Atlas / Open Data climate products.
 - **DERIVED (`derived`)** — transparent project calculations from those sources.
 - **HYPOTHETICAL (`scenario`)** — caller-defined stress tests, never forecasts.
 
-It does **not** fabricate a continuous live Berlin temperature surface from sparse station points and does not dynamically calculate PET/UTCI from incomplete physical inputs.
+The project does not turn sparse station readings into a continuous live temperature surface. It also does not calculate PET/UTCI dynamically when the required physical inputs are missing.
 
 ## What the project supports
 
